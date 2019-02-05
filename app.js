@@ -2,6 +2,15 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const exphbs = require('express-handlebars');
+const mongoose = require('mongoose');
+
+mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true}).then((db)=>
+{
+    console.log('Database connected.');
+}).catch(err=>
+    {
+        console.log(err);
+    });
 
 // tells server to serve static content (css and js files) from public
 // directory
@@ -18,11 +27,13 @@ app.set('view engine', 'handlebars');
 // requiring router files for home and admin
 const home = require('./routes/home/index.js');
 const admin = require('./routes/admin/index.js');
+const posts = require('./routes/admin/posts.js');
 
 // tells the server when the base of the request matches one of these
 // patterns to use the correct router based off the base of the path
 app.use('/', home);
 app.use('/admin', admin);
+app.use('/admin/posts', posts);
 
 app.listen(8000, ()=>
 {
