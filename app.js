@@ -3,6 +3,7 @@ const app = express();
 const path = require('path');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
+const parser = require('body-parser');
 
 mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true}).then((db)=>
 {
@@ -23,6 +24,9 @@ app.engine('handlebars', exphbs({defaultLayout: 'home'}));
 // assigning a name to a value, kind of like a registry
 // some names are reserved for the express app
 app.set('view engine', 'handlebars');
+
+app.use(parser.urlencoded({extended: true}));
+app.use(parser.json());
 
 // requiring router files for home and admin
 const home = require('./routes/home/index.js');
