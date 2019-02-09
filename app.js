@@ -6,7 +6,12 @@ const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const parser = require('body-parser');
 const methodOverride = require('method-override');
+const upload = require('express-fileupload');
 
+// useNewUrlParser tells mongoose to use the new url parser method 
+// for their api. useFindAndModify is another bit of deprecated code
+// and by setting that option to false it tells the mongoose api to 
+// use the newer findOneAndModify methods instead
 mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFindAndModify: false}).then((db)=>
 {
     console.log('Database connected.');
@@ -30,6 +35,9 @@ app.engine('handlebars', exphbs({defaultLayout: 'home',
 // assigning a name to a value, kind of like a registry
 // some names are reserved for the express app
 app.set('view engine', 'handlebars');
+
+// used for file uploads
+app.use(upload());
 
 app.use(parser.urlencoded({extended: true}));
 app.use(parser.json());

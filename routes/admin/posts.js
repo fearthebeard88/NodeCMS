@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../../models/Post');
+const {isEmpty} = require('../../helpers/upload-helper');
+const fs = require('fs');
 
 // tells the server to apply logic to all requests that match
 // the base of this route
@@ -32,11 +34,28 @@ router.get('/create', (req, res)=>
 
 router.post('/create', (req, res)=>
 {
+    let fileName = ''; // placeholder image will go here
+
+    if (!isEmpty(req.files))
+    {
+        let file = req.files.file;
+        fileName = Date.now() + '-' + file.name;
+
+        file.mv('./public/uploads/' + fileName, (err)=>
+        {
+            if (err)
+            {
+                throw err;
+            }
+        });
+    }
+
     var newPost = new Post({
         title: req.body.title,
         status: req.body.status,
         allowComments: !(req.body.hasOwnProperty('allowComments')) ? false : true,
-        body: req.body.body
+        body: req.body.body,
+        file: fileName
     });
 
     newPost.save().then(savedPost=>
@@ -94,12 +113,23 @@ router.delete('/:id', (req, res)=>
     Post.findOneAndDelete({_id: req.params.id}).then(id=>
         {
             console.log(`${id.id} has been deleted.`);
+            let file = id.file;
+            if (fs.existsSync('./public/uploads/' + file))
+            {
+                fs.unlinkSync('./public/uploads/' + file);
+                console.log(`${file} has been deleted.`);
+            }
+            else{
+                console.log(`${file} does not exist to delete.`);
+            }
+            
             res.redirect('/admin/posts');
         }).catch(err=>
             {
                 console.log(err);
                 res.redirect('/admin/posts');
             });
+
 });
 
 module.exports = router;
