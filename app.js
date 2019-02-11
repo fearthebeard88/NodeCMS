@@ -8,6 +8,10 @@ const parser = require('body-parser');
 const methodOverride = require('method-override');
 const upload = require('express-fileupload');
 
+// tells server to serve static content (css and js files) from public
+// directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // useNewUrlParser tells mongoose to use the new url parser method 
 // for their api. useFindAndModify is another bit of deprecated code
 // and by setting that option to false it tells the mongoose api to 
@@ -19,10 +23,6 @@ mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFin
     {
         console.log(err);
     });
-
-// tells server to serve static content (css and js files) from public
-// directory
-app.use(express.static(path.join(__dirname, 'public')));
 
 const {select} = require('./helpers/handlebars-helper.js');
 // telling server what the template engine and extension is, and
