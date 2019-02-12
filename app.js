@@ -12,6 +12,9 @@ const upload = require('express-fileupload');
 // directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// used for file uploads
+app.use(upload());
+
 // useNewUrlParser tells mongoose to use the new url parser method 
 // for their api. useFindAndModify is another bit of deprecated code
 // and by setting that option to false it tells the mongoose api to 
@@ -35,9 +38,6 @@ app.engine('handlebars', exphbs({defaultLayout: 'home',
 // assigning a name to a value, kind of like a registry
 // some names are reserved for the express app
 app.set('view engine', 'handlebars');
-
-// used for file uploads
-app.use(upload());
 
 app.use(parser.urlencoded({extended: true}));
 app.use(parser.json());

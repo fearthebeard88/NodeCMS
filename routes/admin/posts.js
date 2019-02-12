@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../../models/Post');
-const {isEmpty} = require('../../helpers/upload-helper');
+const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
 const fs = require('fs');
 
 // tells the server to apply logic to all requests that match
@@ -34,20 +34,23 @@ router.get('/create', (req, res)=>
 
 router.post('/create', (req, res)=>
 {
-    let fileName = ''; // placeholder image will go here
+    // placeholder image will go here
+    let fileName = ''; 
 
     if (!isEmpty(req.files))
     {
         let file = req.files.file;
         fileName = Date.now() + '-' + file.name;
 
-        file.mv('./public/uploads/' + fileName, (err)=>
-        {
-            if (err)
-            {
-                throw err;
-            }
-        });
+        file.mv('./public/uploads/' + fileName);
+
+        // file.mv('./public/uploads/' + fileName, (err)=>
+        // {
+        //     if (err)
+        //     {
+        //         throw err;
+        //     }
+        // });
     }
 
     var newPost = new Post({
@@ -116,7 +119,7 @@ router.delete('/:id', (req, res)=>
             let file = id.file;
             if (fs.existsSync('./public/uploads/' + file))
             {
-                fs.unlinkSync('./public/uploads/' + file);
+                fs.unlinkSync(uploadDir + file);
                 console.log(`${file} has been deleted.`);
             }
             else{
