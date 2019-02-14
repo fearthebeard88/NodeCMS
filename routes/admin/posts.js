@@ -3,6 +3,7 @@ const router = express.Router();
 const Post = require('../../models/Post');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
 const fs = require('fs');
+const {postValidator} = require('../../helpers/handlebars-helper');
 
 // tells the server to apply logic to all requests that match
 // the base of this route
@@ -34,42 +35,73 @@ router.get('/create', (req, res)=>
 
 router.post('/create', (req, res)=>
 {
-    // placeholder image will go here
-    let fileName = ''; 
+    let requiredProperties = {title: 'Title', body: 'Description'};
+    // let errors = [];
 
-    if (!isEmpty(req.files))
+    // for (let property in req.body)
+    // {
+    //     if (req.body.hasOwnProperty(property) && requiredProperties.hasOwnProperty(property))
+    //     {
+    //         if (!req.body.property)
+    //         {
+    //             errors.push({
+    //                 message: `${requiredProperties[property]} cannot be empty.`
+    //             });
+    //         }
+    //     }
+    // }
+
+    let errors = postValidator(req.body, requiredProperties);
+    if (errors == null)
     {
-        let file = req.files.file;
-        fileName = Date.now() + '-' + file.name;
-
-        file.mv('./public/uploads/' + fileName);
-
-        // file.mv('./public/uploads/' + fileName, (err)=>
-        // {
-        //     if (err)
-        //     {
-        //         throw err;
-        //     }
-        // });
+        errors = [{message: 'Validation failed.'}];
     }
 
-    var newPost = new Post({
-        title: req.body.title,
-        status: req.body.status,
-        allowComments: !(req.body.hasOwnProperty('allowComments')) ? false : true,
-        body: req.body.body,
-        file: fileName
-    });
+    if (errors.length > 0)
+    {
+        res.render('admin/posts/create', {
+            errors: errors
+        });
+    }
+    else
+    {
+        // placeholder image will go here
+        let fileName = ''; 
 
-    newPost.save().then(savedPost=>
+        if (!isEmpty(req.files))
         {
-            console.log(`Saved new post ${newPost.title}`);
-            res.redirect('/admin/posts');
-        }).catch(err=>
+            let file = req.files.file;
+            fileName = Date.now() + '-' + file.name;
+
+            file.mv('./public/uploads/' + fileName);
+
+            // file.mv('./public/uploads/' + fileName, (err)=>
+            // {
+            //     if (err)
+            //     {
+            //         throw err;
+            //     }
+            // });
+        }
+
+        var newPost = new Post({
+            title: req.body.title,
+            status: req.body.status,
+            allowComments: !(req.body.hasOwnProperty('allowComments')) ? false : true,
+            body: req.body.body,
+            file: fileName
+        });
+
+        newPost.save().then(savedPost=>
             {
-                console.log(`Error saving post. Error: ${err}`);
+                console.log(`Saved new post ${newPost.title}`);
                 res.redirect('/admin/posts');
-            });
+            }).catch(err=>
+                {
+                    console.log(`Error saving post. Error: ${err}`);
+                    res.redirect('/admin/posts');
+                });
+    }
 });
 
 // View a post to edit
@@ -117,14 +149,36 @@ router.delete('/:id', (req, res)=>
         {
             console.log(`${id.id} has been deleted.`);
             let file = id.file;
-            if (fs.existsSync('./public/uploads/' + file))
+            fs.exists(uploadDir + file, (exists)=>
             {
-                fs.unlinkSync(uploadDir + file);
-                console.log(`${file} has been deleted.`);
-            }
-            else{
-                console.log(`${file} does not exist to delete.`);
-            }
+                if (!exists)
+                {
+                    console.log(`${file} does not exist to delete.`);
+                }
+                else
+                {
+                    fs.unlink(uploadDir + file, (err)=>
+                    {
+                        if (err)
+                        {
+                            console.log(`${file} could not be deleted. Error: ${err}`);
+                        }
+                        else
+                        {
+                            console.log(`${file} was deleted.`);
+                        }
+                    });
+                }
+            });
+
+            // if (fs.existsSync('./public/uploads/' + file))
+            // {
+            //     fs.unlinkSync(uploadDir + file);
+            //     console.log(`${file} has been deleted.`);
+            // }
+            // else{
+            //     console.log(`${file} does not exist to delete.`);
+            // }
             
             res.redirect('/admin/posts');
         }).catch(err=>
