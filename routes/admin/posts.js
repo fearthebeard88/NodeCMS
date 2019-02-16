@@ -73,7 +73,13 @@ router.post('/create', (req, res)=>
             let file = req.files.file;
             fileName = Date.now() + '-' + file.name;
 
-            file.mv('./public/uploads/' + fileName);
+            file.mv('./public/uploads/' + fileName, (err)=>
+            {
+                if (err)
+                {
+                    throw err;
+                }
+            });
 
             // file.mv('./public/uploads/' + fileName, (err)=>
             // {
