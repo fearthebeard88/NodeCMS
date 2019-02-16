@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const parser = require('body-parser');
 const methodOverride = require('method-override');
 const upload = require('express-fileupload');
+const session = require('express-session');
+const flash = require('connect-flash');
 
 // tells server to serve static content (css and js files) from public
 // directory
@@ -27,13 +29,15 @@ mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFin
         console.log(err);
     });
 
-const {select} = require('./helpers/handlebars-helper.js');
+// registering helper methods to use in middleware
+const {select, prettyPrintDate} = require('./helpers/handlebars-helper.js');
+
 // telling server what the template engine and extension is, and
 // setting default layout file
 // helpers is telling handlebars about the helper methods that are
 // exported in the helpers directory
 app.engine('handlebars', exphbs({defaultLayout: 'home',
-                                 helpers: {select: select}}));
+                                 helpers: {select: select, prettyPrintDate: prettyPrintDate}}));
 
 // assigning a name to a value, kind of like a registry
 // some names are reserved for the express app
@@ -44,6 +48,21 @@ app.use(parser.json());
 
 // method override
 app.use(methodOverride('_method'));
+
+app.use(session({
+    secret: 'IHaveNoIdeaWhatThisDoes',
+    resave: true,
+    saveUninitialized: true
+}));
+
+app.use(flash());
+
+// setting local variable for handlebars using middleware and flash
+app.use((req, res, next)=>
+{
+    res.locals.successMessage = req.flash('successMessage');
+    next();
+});
 
 // requiring router files for home and admin
 const home = require('./routes/home/index.js');

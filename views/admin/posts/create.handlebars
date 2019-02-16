@@ -1,7 +1,9 @@
 <h1>Create Post</h1>
 
 {{#each errors}}
-    <h1>{{message}}</h1><br/>
+<div class="alert alert-danger">
+    {{message}}<br/>
+</div>
 {{/each}}
 
 <form action="/admin/posts/create" method="post" enctype="multipart/form-data">
@@ -30,5 +32,5 @@
         <label for="body">Description</label>
         <textarea rows="10" cols="30" name="body" class="form-control" id="body" placeholder="Enter description text here."></textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Create Post</button>
 </form>

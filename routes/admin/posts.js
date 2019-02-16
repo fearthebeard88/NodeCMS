@@ -19,12 +19,12 @@ router.all('/*', (req, res, next)=>
 router.get('/', (req, res)=>
 {
     Post.find({}).then(posts=>
-        {
-            res.render('admin/posts/index', {posts: posts});
-        }).catch(err=>
-            {
-                res.render(err);
-            });
+    {
+        res.render('admin/posts/index', {posts: posts});
+    }).catch(err=>
+    {
+        res.render(err);
+    });
 });
 
 // Create a post
@@ -93,14 +93,18 @@ router.post('/create', (req, res)=>
         });
 
         newPost.save().then(savedPost=>
-            {
-                console.log(`Saved new post ${newPost.title}`);
-                res.redirect('/admin/posts');
-            }).catch(err=>
-                {
-                    console.log(`Error saving post. Error: ${err}`);
-                    res.redirect('/admin/posts');
-                });
+        {
+            let msg = `Saved new post ${savedPost.title}`;
+            console.log(msg);
+            req.flash('successMessage', msg);
+            res.redirect('/admin/posts');
+        }).catch(err=>
+        {
+            let msg = `Error saving post. Error: ${err}`;
+            req.flash('errorMessage', msg);
+            console.log(msg);
+            res.redirect('/admin/posts');
+        });
     }
 });
 
@@ -112,81 +116,120 @@ router.post('/create', (req, res)=>
 router.get('/edit/:id', (req, res)=>
 {
     Post.findById(req.params.id).then(post=>
-        {
-            res.render('admin/posts/edit', {post: post});
-        }).catch(err=>
-            {
-                res.sendStatus(404).send('Post not found.');
-            });
+    {
+        res.render('admin/posts/edit', {post: post});
+    }).catch(err=>
+    {
+        res.sendStatus(404).send('Post not found.');
+    });
 });
 
 // This is the actual edit request sent by the form
 router.put('/edit/:id', (req, res)=>
 {
-    Post.findOneAndUpdate({_id: req.params.id}, {
-        status: req.body.status,
-        title: req.body.title,
-        allowComments: !(req.body.hasOwnProperty('allowComments')) ? false : true,
-        body: req.body.body
-    }, {runValidators: true}).then(newPost=>
+    let fileName = null;
+
+    if (!isEmpty(req.files))
+    {
+        let file = req.files.file;
+        fileName = Date.now() + '-' + file.name;
+
+        // TODO figure out how to catch errors in this function
+        // note: callbacks do not seem to work with it right now
+        file.mv('./public/uploads/' + fileName);
+    }
+
+    Post.findOne({_id: req.params.id}).then(post=>
+    {
+        post.status = req.body.status;
+        post.title = req.body.title;
+        post.allowComments = !(req.body.hasOwnProperty('allowComments')) ? false : true;
+        post.body = req.body.body;
+        if (fileName != null)
         {
-            newPost.save().then(updated=>
+            // if the user updated their image then we want to get 
+            // rid of the old image so it does not clutter the 
+            // upload directory
+            let oldFile = post.file;
+            console.log(post.file);
+            fs.exists(uploadDir + oldFile, (exists)=>
             {
-                console.log(`${updated.id} has been updated.`);
-                res.redirect('/admin/posts');
-            }).catch(err=>
+                if (!exists)
                 {
-                    console.log(`${err.id} failed to update.`);
-                    res.redirect('/admin/posts');
-                });
+                    console.log(`${oldFile} does not exist to delete.`);
+                }
+                else
+                {
+                    fs.unlink(uploadDir + oldFile, (err)=>
+                    {
+                        if (err)
+                        {
+                            console.log(`${oldFile} could not be deleted. Error: ${err}`);
+                        }
+                        else
+                        {
+                            console.log(`${oldFile} was deleted.`);
+                        }
+                    });
+                }
+            });
+
+            post.file = fileName;
+        }
+
+        post.save().then(updated=>
+        {
+            let msg = `${updated.id} has been updated.`;
+            req.flash('successMessage', msg);
+            console.log(msg);
+            res.redirect('/admin/posts');
+        }).catch(err=>
+        {
+            let msg = `${err.id} failed to update.`
+            req.flash('errorMessage', msg);
+            console.log(msg);
+            res.redirect('/admin/posts');
         });
+    });
 });
 
 // Delete a post
 router.delete('/:id', (req, res)=>
 {
     Post.findOneAndDelete({_id: req.params.id}).then(id=>
+    {
+        console.log(`${id.id} has been deleted.`);
+        let file = id.file;
+        fs.exists(uploadDir + file, (exists)=>
         {
-            console.log(`${id.id} has been deleted.`);
-            let file = id.file;
-            fs.exists(uploadDir + file, (exists)=>
+            if (!exists)
             {
-                if (!exists)
+                console.log(`${file} does not exist to delete.`);
+            }
+            else
+            {
+                fs.unlink(uploadDir + file, (err)=>
                 {
-                    console.log(`${file} does not exist to delete.`);
-                }
-                else
-                {
-                    fs.unlink(uploadDir + file, (err)=>
+                    if (err)
                     {
-                        if (err)
-                        {
-                            console.log(`${file} could not be deleted. Error: ${err}`);
-                        }
-                        else
-                        {
-                            console.log(`${file} was deleted.`);
-                        }
-                    });
-                }
-            });
-
-            // if (fs.existsSync('./public/uploads/' + file))
-            // {
-            //     fs.unlinkSync(uploadDir + file);
-            //     console.log(`${file} has been deleted.`);
-            // }
-            // else{
-            //     console.log(`${file} does not exist to delete.`);
-            // }
-            
-            res.redirect('/admin/posts');
-        }).catch(err=>
-            {
-                console.log(err);
-                res.redirect('/admin/posts');
-            });
-
+                        console.log(`${file} could not be deleted. Error: ${err}`);
+                    }
+                    else
+                    {
+                        console.log(`${file} was deleted.`);
+                    }
+                });
+            }
+        });
+        
+        req.flash('successMessage', `${id.title} was deleted.`);
+        res.redirect('/admin/posts');
+    }).catch(err=>
+    {
+        req.flash('errorMessage', `Error deleting ${id.title}.`);
+        console.log(err);
+        res.redirect('/admin/posts');
+    });
 });
 
 module.exports = router;

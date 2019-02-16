@@ -1,9 +1,14 @@
 <h1>Edit Post</h1>
 
-<form action="/admin/posts/edit/{{post.id}}?_method=PUT" method="post">
+<!-- uses PUT http method to send request to router with post id -->
+<form action="/admin/posts/edit/{{post.id}}?_method=PUT" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label for="title">Title</label>
         <input name="title" type="text" class="form-control" id="title" value="{{post.title}}">
+    </div>
+    <div class="form-group">
+        <label for="file">File Upload</label>
+        <input type="file" name="file" class="form-control">
     </div>
     <div class="form-group">
         <label for="status">Post Status</label>
@@ -24,5 +29,5 @@
         <label for="body">Description</label>
         <textarea rows="10" cols="30" name="body" class="form-control" id="body">{{post.body}}</textarea>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Update Post</button>
 </form>

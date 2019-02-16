@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 module.exports = {
     select: function(status, options)
     {
@@ -8,7 +10,7 @@ module.exports = {
      * 
      * @param {Object} req.body{}
      * @param {Object} requiredProperties{}
-     * @returns {mixed} errors{message:<string>} or null
+     * @returns {[]} errors{message:<string>} or null
      */
     postValidator: function(req, requiredProperties)
     {
@@ -27,7 +29,7 @@ module.exports = {
                 continue;
             }
 
-            if (req[property].length <= 0)
+            if (req[property].trim().length <= 0)
             {
                 errors.push({
                     message: `${requiredProperties[property]} cannot be empty.`
@@ -36,5 +38,10 @@ module.exports = {
         }
 
         return errors;
+    },
+
+    prettyPrintDate: function(date, format)
+    {
+        return moment(date).format(format);
     }
 }
