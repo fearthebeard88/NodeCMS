@@ -4,7 +4,7 @@
   "description": "content management system",
   "main": "app.js",
   "scripts": {
-    "start" : "nodemon app.js"
+    "start" : "start.sh"
   },
   "author": "Tim Ferris",
   "license": "ISC",

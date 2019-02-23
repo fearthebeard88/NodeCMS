@@ -15,7 +15,7 @@ module.exports = {
     postValidator: function(req, requiredProperties)
     {
         let errors = [];
-        if (typeof req == 'undefined' || typeof requiredProperties == 'undefined')
+        if (typeof req == 'undefined' || typeof requiredProperties == 'undefined' || req == null || requiredProperties == null)
         {
             return null;
         }

@@ -15,7 +15,10 @@ const flash = require('connect-flash');
 app.use(express.static(path.join(__dirname, 'public')));
 
 // used for file uploads
-app.use(upload());
+app.use(upload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/'
+}));
 
 // useNewUrlParser tells mongoose to use the new url parser method 
 // for their api. useFindAndModify is another bit of deprecated code
@@ -25,9 +28,9 @@ mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFin
 {
     console.log('Database connected.');
 }).catch(err=>
-    {
-        console.log(err);
-    });
+{
+    console.log(err);
+});
 
 // registering helper methods to use in middleware
 const {select, prettyPrintDate} = require('./helpers/handlebars-helper.js');
@@ -68,12 +71,14 @@ app.use((req, res, next)=>
 const home = require('./routes/home/index.js');
 const admin = require('./routes/admin/index.js');
 const posts = require('./routes/admin/posts.js');
+const categories = require('./routes/admin/categories.js');
 
 // tells the server when the base of the request matches one of these
 // patterns to use the correct router based off the base of the path
 app.use('/', home);
 app.use('/admin', admin);
 app.use('/admin/posts', posts);
+app.use('/admin/categories', categories);
 
 app.listen(port, ()=>
 {
