@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../../models/Post');
+const Category = require('../../models/Category');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
 const fs = require('fs');
 const {postValidator} = require('../../helpers/handlebars-helper');
@@ -30,7 +31,15 @@ router.get('/', (req, res)=>
 // Create a post
 router.get('/create', (req, res)=>
 {
-    res.render('admin/posts/create');
+    Category.find({}).then(categories=>
+    {
+        res.render('admin/posts/create', {categories: categories});
+    }).catch(err=>
+    {
+        let msg = `Failed to load categories. Error: ${err}`;
+        req.flash('errorMessage', msg);
+        res.redirect('/admin/posts');
+    });
 });
 
 router.post('/create', (req, res)=>
@@ -126,23 +135,51 @@ router.get('/edit/:id', (req, res)=>
         res.render('admin/posts/edit', {post: post});
     }).catch(err=>
     {
-        res.sendStatus(404).send('Post not found.');
+        let msg = `Failed to load post with id: ${req.params.id}. Error: ${err}`;
+        req.flash('errorMessage', msg);
+        res.redirect('/admin/posts');
     });
 });
 
 // This is the actual edit request sent by the form
 router.put('/edit/:id', (req, res)=>
 {
+    let requiredFields = {title: 'Title', body: 'Description'};
+    let errors = postValidator(req.body, requiredFields);
+
+    if (errors == null)
+    {
+        let msg = `Validation failed.`;
+        req.flash('errorMessage', msg);
+        res.redirect('/admin/posts/edit/' + req.params.id);
+    }
+
+    if (errors.length > 0)
+    {
+        for (let i = 0; i < errors.length; i++)
+        {
+            req.flash('errorMessage', errors[i].message);
+        }
+
+        res.redirect('/admin/posts/edit' + req.params.id);
+    }
+
     let fileName = null;
 
-    if (!isEmpty(req.files))
+    if (req.files.file.name.trim().length > 0)
     {
+        console.log(req.files);
         let file = req.files.file;
         fileName = Date.now() + '-' + file.name;
 
-        // TODO figure out how to catch errors in this function
-        // note: callbacks do not seem to work with it right now
-        file.mv('./public/uploads/' + fileName);
+        
+        file.mv('./public/uploads/' + fileName, (err)=>
+        {
+            if (err)
+            {
+                throw err;
+            }
+        });
     }
 
     Post.findOne({_id: req.params.id}).then(post=>

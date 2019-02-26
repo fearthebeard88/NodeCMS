@@ -25,6 +25,12 @@ const PostSchema = new Schema({
     date: {
         type: Date,
         default: Date.now()
+    },
+    
+    // referencing another schema
+    category: {
+        type: Schema.Types.ObjectId,
+        ref: 'categories'
     }
 });
 

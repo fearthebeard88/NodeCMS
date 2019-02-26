@@ -1,10 +1,12 @@
 <h1>Edit Category</h1>
-
+{{#each errors}}
+    <div class="alert alert-danger">{{message}}</div><br>
+{{/each}}
 <!-- uses PUT http method to send request to router with post id -->
 <form action="/admin/categories/edit/{{category.id}}?_method=PUT" method="post">
     <div class="form-group">
         <label for="name">Category Name</label>
-        <input name="name" type="text" class="form-control" id="title" placeholder="{{categories.name}}">
+        <input name="name" type="text" class="form-control" id="title" value="{{category.name}}">
     </div>
     <button type="submit" class="btn btn-primary">Update Category</button>
 </form>

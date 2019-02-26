@@ -62,8 +62,10 @@ router.get('/edit/:id', (req, res)=>
         res.render('admin/categories/edit', {category: category});
     }).catch(err=>
     {
-        res.sendStatus(404).send(`Category with id ${req.params.id} not found.`);
-        res.end();
+        let msg = `Unable to get category with id: ${req.params.id}.
+         Recieved the following error: ${err}`;
+        req.flash('errorMessage', msg);
+        res.redirect('/admin/categories');
     });
 });
 
@@ -85,6 +87,46 @@ router.put('/edit/:id', (req, res)=>
 
         res.redirect('/admin/categories/edit/' + req.params.id);
     }
-})
+    else
+    {
+        Category.findOne({_id: req.params.id}).then(category=>
+        {
+            category.name = req.body.name;
+            category.save().then(updatedCat=>
+            {
+                let msg = `${category.name} has been updated.`;
+                req.flash('successMessage', msg);
+                res.redirect('/admin/categories');
+            }).catch(err=>
+            {
+                let msg = `${category.name} was not updated.`;
+                req.flash('errorMessage', msg);
+                res.redirect('/admin/categories');
+            });
+        }).catch(err=>
+        {
+            let msg = `The following error occured when
+             attempting to find ${req.body.name}. Error: ${err}`;
+            req.flash('errorMessage', msg);
+            res.redirect('/admin/categories');
+        });
+    }
+});
+
+router.delete('/delete/:id', (req, res)=>
+{
+    Category.findOneAndDelete({_id: req.params.id}).then(id=>
+    {
+        let msg = `${id.id} has been removed.`;
+        req.flash('successMessage', msg);
+        res.redirect('/admin/categories');
+    }).catch(err=>
+    {
+        let msg = `Unable to delete category with id: ${req.params.id}.
+         Error: ${err}`;
+        req.flash('errorMessage', msg);
+        res.redirect('/admin/categories');
+    });
+});
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../../models/Post');
+const Category = require('../../models/Category');
 
 router.all('/*', (req, res, next)=>
 {
@@ -12,10 +13,21 @@ router.get('/', (req, res)=>
 {   
     Post.find({}).then(posts=>
     {
-        res.render('home/index', {posts:posts});
+        Category.find({}).then(categories=>
+        {
+            res.render('home/index', {posts:posts, categories: categories});
+        }).catch(err=>
+        {
+            let msg = `Failed to load categories. Error: ${err}`;
+            req.flash('errorMessage', msg);
+            res.render('home/index', {posts: posts});
+        })
+        
     }).catch(err=>
     {
-        res.status(500).send('<h1>Error loading page</h1><br/><p>' + err + '</p>');
+        let msg = `Failed to load posts. Error: ${err}`;
+        req.flash('errorMessage', msg);
+        res.render('home/index');
     });
 });
 
@@ -38,10 +50,20 @@ router.get('/post/:id', (req, res)=>
 {
     Post.findById(req.params.id).then(post=>
     {
-        res.render('home/posts/post', {post: post});
+        Category.find({}).then(categories=>
+        {
+            res.render('home/posts/post', {post: post, categories: categories});
+        }).catch(err=>
+        {
+            let msg = `Failed to load categories. Error: ${err}`;
+            req.flash('errorMessage', msg);
+            res.render('home/posts/post', {post: post});
+        });
+        
     }).catch(err=>
     {
-        console.log(`Unable to locate post with id ${req.params.id}`);
+        let msg = `Failed to load post: ${req.params.id}. Error: ${err}`;
+        req.flash('errorMessage', msg);
         res.redirect('/');
     });
 });
