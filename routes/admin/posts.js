@@ -19,7 +19,9 @@ router.all('/*', (req, res, next)=>
 // View all posts
 router.get('/', (req, res)=>
 {
-    Post.find({}).then(posts=>
+    // populate method takes a path (from the originating model)
+    // and grabs the associated object
+    Post.find({}).populate('category').then(posts=>
     {
         res.render('admin/posts/index', {posts: posts});
     }).catch(err=>
@@ -104,7 +106,8 @@ router.post('/create', (req, res)=>
             status: req.body.status,
             allowComments: !(req.body.hasOwnProperty('allowComments')) ? false : true,
             body: req.body.body,
-            file: fileName
+            file: fileName,
+            category: req.body.category
         });
 
         newPost.save().then(savedPost=>
@@ -132,7 +135,16 @@ router.get('/edit/:id', (req, res)=>
 {
     Post.findById(req.params.id).then(post=>
     {
-        res.render('admin/posts/edit', {post: post});
+        Category.find({}).then(categories=>
+        {
+            res.render('admin/posts/edit', {post: post, categories: categories});
+        }).catch(err=>
+        {
+            let msg = `Failed to load categories. Error: ${err}`;
+            req.flash('errorMessage', msg);
+            res.redirect('/admin/posts');
+        });
+        
     }).catch(err=>
     {
         let msg = `Failed to load post with id: ${req.params.id}. Error: ${err}`;
@@ -188,6 +200,7 @@ router.put('/edit/:id', (req, res)=>
         post.title = req.body.title;
         post.allowComments = !(req.body.hasOwnProperty('allowComments')) ? false : true;
         post.body = req.body.body;
+        post.category = req.body.category;
         if (fileName != null)
         {
             // if the user updated their image then we want to get 
