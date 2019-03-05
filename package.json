@@ -4,11 +4,12 @@
   "description": "content management system",
   "main": "app.js",
   "scripts": {
-    "start" : "start.sh"
+    "start": "start.sh"
   },
   "author": "Tim Ferris",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "connect-flash": "^0.1.1",
     "express": "^4.16.4",

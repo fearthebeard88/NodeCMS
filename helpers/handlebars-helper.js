@@ -43,5 +43,11 @@ module.exports = {
     prettyPrintDate: function(date, format)
     {
         return moment(date).format(format);
+    },
+
+    flashArrayMessages: function (flashArray)
+    {
+        console.log(flashArray);
+        return flashArray;
     }
 }

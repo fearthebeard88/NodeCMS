@@ -1,38 +1,13 @@
-// requiring express module to run server
 const express = require('express');
-
-// setting port for server to listen on. will look for environment
-// variable PORT or fallback on port 8000
 const port = process.env.PORT || 8000;
-
-// instantiating an instance of express
 const app = express();
-
-// requiring/including nodes built in path module for working
-// with file paths
 const path = require('path');
-
-// requiring a template engine (express handlebars)
 const exphbs = require('express-handlebars');
-
-// requiring mongoose for setting up schemas for database
 const mongoose = require('mongoose');
-
-// requiring body parser middleware to let node read url encrypted
-// and json data
 const parser = require('body-parser');
-
-// requring a module to allow forms to use different http methods
-// other than GET and POST
 const methodOverride = require('method-override');
-
-// requring a module to handle file uploads
 const upload = require('express-fileupload');
-
-// requiring a module to hold session data
 const session = require('express-session');
-
-// requiring a module to pass strings by session data between pages
 const flash = require('connect-flash');
 
 // tells server to serve static content (css and js files) from public
@@ -59,14 +34,19 @@ mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFin
 
 // require/include these methods defined in helper directory
 // registering helper methods to use in middleware
-const {select, prettyPrintDate} = require('./helpers/handlebars-helper.js');
+const {select, prettyPrintDate, flashArrayMessages} = require('./helpers/handlebars-helper.js');
 
 // telling server what the template engine and extension is, and
 // setting default layout file
 // helpers is telling handlebars about the helper methods that are
 // exported in the helpers directory
-app.engine('handlebars', exphbs({defaultLayout: 'home',
-                                 helpers: {select: select, prettyPrintDate: prettyPrintDate}}));
+app.engine('handlebars',
+    exphbs({defaultLayout: 'home',
+                helpers: {
+                    select: select,
+                    prettyPrintDate: prettyPrintDate,
+                    flashArrayMessages: flashArrayMessages
+                }}));
 
 // setting a key : value pair, similar to Magento's registry
 // for global variables available anywhere on the app
@@ -111,6 +91,7 @@ const home = require('./routes/home/index.js');
 const admin = require('./routes/admin/index.js');
 const posts = require('./routes/admin/posts.js');
 const categories = require('./routes/admin/categories.js');
+
 
 // matches requests or part of a request to a router
 app.use('/', home);
