@@ -9,6 +9,9 @@ const methodOverride = require('method-override');
 const upload = require('express-fileupload');
 const session = require('express-session');
 const flash = require('connect-flash');
+const {mongoUrl} = require('./config/database');
+const passport = require('passport');
+const User = require('./models/User');
 
 // tells server to serve static content (css and js files) from public
 // directory
@@ -26,7 +29,7 @@ app.use(upload({
 // use the newer findOneAndModify methods instead
 // new way of connecting to mongo using callback instead of promise and catch. this method will
 // exit the application if the database fails to connect.
-mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFindAndModify: false}, (err)=>
+mongoose.connect(mongoUrl, {useNewUrlParser: true, useFindAndModify: false}, (err)=>
 {
     if (err)
     {
@@ -81,6 +84,22 @@ app.use(session({
     saveUninitialized: true
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done)=>
+{
+    return done(null, user.id);
+})
+
+passport.deserializeUser((id, done)=>
+{
+    User.findById(id, (err, user)=>
+    {
+        return done(err, user);
+    })
+})
+
 // setting flash middleware for passing strings in session data
 app.use(flash());
 
@@ -89,9 +108,17 @@ app.use((req, res, next)=>
 {
     // I think this intercepts requests with flash object
     // that has properties of string included as argument
-    // and sets them as local variables to the app
+    // and sets them as local variables to the app,
+    // think of magento registry
+    res.locals.user = req.user || null;
     res.locals.successMessage = req.flash('successMessage');
     res.locals.errorMessage = req.flash('errorMessage');
+
+    // local variables for passport flash messages
+    // res.locals.<object key to be retrieved> = 
+    // req.flash(<object key that holds flash message value>)
+    res.locals.failureFlash = req.flash('error');
+    res.locals.successFlash = req.flash('success');
     next();
 });
 

@@ -14,3 +14,19 @@
         </div>
     {{/each}}
 {{/if}}
+
+{{#if successFlash}}
+    {{#each successFlash}}
+        <div class="alert alert-success">
+            {{this}}
+        </div>
+    {{/each}}
+{{/if}}
+
+{{#if failureFlash}}
+    {{#each failureFlash}}
+        <div class="alert alert-danger">
+            {{this}}
+        </div>
+    {{/each}}
+{{/if}}

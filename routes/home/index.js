@@ -5,6 +5,8 @@ const User = require('../../models/User');
 const Category = require('../../models/Category');
 const {postValidator} = require('../../helpers/handlebars-helper');
 const bcrypt = require('bcryptjs');
+const passport = require('passport');
+const pLocalStrategy = require('passport-local').Strategy;
 
 router.all('/*', (req, res, next)=>
 {
@@ -31,6 +33,103 @@ router.get('/about', (req, res)=>
 router.get('/login', (req, res)=>
 {
     res.render('home/login');
+});
+
+// passport middleware with strategy object
+passport.use(new pLocalStrategy({usernameField: 'email'}, (email, password, done)=>
+{
+    User.findOne({email: email}).then(user=>
+    {
+        if (!user)
+        {
+            return done(null, false, {message: `Credentials failed.`});
+        }
+
+        bcrypt.compare(password, user.password, (err, match)=>
+        {
+            if (err)
+            {
+                throw err;
+            }
+
+            if (match)
+            {
+                return done(null, user, {message: `Welcome ${user.firstName}!`});
+            }
+
+            return done(null, false, {message: `Credentials failed.`});
+        })
+    })
+}));
+
+
+
+router.post('/login', (req, res, next)=>
+{
+    let requiredFields = {
+        email: 'Email',
+        password: 'Password'
+    };
+
+    let errors = postValidator(req.body, requiredFields);
+    
+    if (errors == null)
+    {
+        errors = [{message: 'Validation check failed.'}];
+    }
+
+    if (errors.length > 0)
+    {
+        for (let i = 0; i < errors.length; i++)
+        {
+            req.flash('errorMessage', errors[i].message);
+        }
+
+        let badUser = {
+            email: null,
+            password: null
+        };
+
+        for (let prop in badUser)
+        {
+            if (badUser.hasOwnProperty(prop) && req.body.hasOwnProperty(prop))
+            {
+                badUser[prop] = req.body[prop];
+            }
+        }
+
+        res.render('home/login', {badUser:badUser, errorMessage: req.flash('errorMessage')});
+    }
+    else
+    {
+        // this will go through the passport middleware, first
+        // argument tells passport which strategy object to use
+        // object passed in sets config options for this request
+        passport.authenticate('local', {
+            successRedirect: '/admin',
+            failureRedirect: '/login',
+            failureFlash: true,
+            successFlash: true
+        })(req, res, next);
+    }
+});
+
+router.get('/logout', (req, res)=>
+{
+    if (req.user)
+    {
+        let userFirstName = req.user.firstName;
+        let msg = `Goodbye ${userFirstName}!`;
+        req.flash('successMessage', msg);
+        req.logout();
+        res.redirect('/');
+    }
+    else
+    {
+        req.flash('errorMessage', 'Please login before trying to logout.');
+        res.redirect('/');
+    }
+    
 });
 
 router.get('/register', (req, res)=>

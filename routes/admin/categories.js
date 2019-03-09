@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../../models/Category');
 const {postValidator} = require('../../helpers/handlebars-helper');
+const {userAuthenticated} = require('../../helpers/authentication');
 
-router.all('/*', (req, res, next)=>
+router.all('/*', userAuthenticated, (req, res, next)=>
 {
     req.app.locals.layout = 'admin';
     next();

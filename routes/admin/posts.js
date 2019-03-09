@@ -5,10 +5,11 @@ const Category = require('../../models/Category');
 const {isEmpty, uploadDir} = require('../../helpers/upload-helper');
 const fs = require('fs');
 const {postValidator} = require('../../helpers/handlebars-helper');
+const {userAuthenticated} = require('../../helpers/authentication');
 
 // tells the server to apply logic to all requests that match
 // the base of this route
-router.all('/*', (req, res, next)=>
+router.all('/*', userAuthenticated, (req, res, next)=>
 {
     // req.app holds reference to instance of server that is using 
     // middleware

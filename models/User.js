@@ -20,4 +20,9 @@ const UserSchema = new Schema({
     }
 });
 
+UserSchema.methods.validateUser = function()
+{
+
+}
+
 module.exports = mongoose.model('users', UserSchema);
