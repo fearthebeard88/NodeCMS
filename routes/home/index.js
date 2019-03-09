@@ -19,18 +19,7 @@ router.get('/', (req, res)=>
         Category.find({}).then(categories=>
         {
             res.render('home/index', {posts:posts, categories: categories});
-        }).catch(err=>
-        {
-            let msg = `Failed to load categories. Error: ${err}`;
-            req.flash('errorMessage', msg);
-            res.render('home/index', {posts: posts});
-        })
-        
-    }).catch(err=>
-    {
-        let msg = `Failed to load posts. Error: ${err}`;
-        req.flash('errorMessage', msg);
-        res.render('home/index');
+        });
     });
 });
 
@@ -60,6 +49,7 @@ router.post('/register', (req, res)=>
     };
 
     let errors = postValidator(req.body, requiredFields);
+
     if (errors == null)
     {
         errors = [{message: 'Validation failed.'}];
@@ -70,13 +60,9 @@ router.post('/register', (req, res)=>
         errors.push({message: 'Passwords do not match.'});
     }
 
-    // User.findOne({email: req.body.email}).then(user=>
-    // {
-        
-    // })
-
     if (errors.length > 0)
     {
+        console.log(errors.length);
         for (let i = 0; i < errors.length; i++)
         {
             req.flash('errorMessage', errors[i].message);
@@ -97,45 +83,56 @@ router.post('/register', (req, res)=>
             }
         }
         
-        console.log(errors);
-        res.render('home/register', {badUser: badUser, errorMessage: req.flash(errors)});
+        res.render('home/register', {badUser: badUser, errorMessage: req.flash('errorMessage')});
     }
     else
     {
-        bcrypt.genSalt(10, (err, salt)=>
+        User.findOne({email: req.body.email}).then(user=>
         {
-            if (err)
+            if (!user)
             {
-                throw err;
+                bcrypt.genSalt(10, (err, salt)=>
+                {
+                    if (err)
+                    {
+                        throw err;
+                    }
+
+                    bcrypt.hash(req.body.password, salt, (err, hash)=>
+                    {
+                        if (err)
+                        {
+                            throw err;
+                        }
+
+                        const newUser = new User({
+                            firstName: req.body.firstName,
+                            lastName: req.body.lastName,
+                            email: req.body.email,
+                            password: hash
+                        });
+            
+                        newUser.save().then(user=>
+                        {
+                            let msg = `Welcome ${user.firstName}! You have registered successfully. Please login.`;
+                            req.flash('successMessage', msg);
+                            res.redirect('/login');
+                        }).catch(err=>
+                        {
+                            let msg = `Failed to register user ${req.body.firstName}. 
+                            Error: ${err}`;
+                            req.flash('errorMessage', msg);
+                            res.redirect('/login');
+                        });
+                    });
+                });
             }
-
-            bcrypt.hash(req.body.password, salt, (err, hash)=>
+            else
             {
-                if (err)
-                {
-                    throw err;
-                }
-
-                const newUser = new User({
-                    firstName: req.body.firstName,
-                    lastName: req.body.lastName,
-                    email: req.body.email,
-                    password: hash
-                });
-    
-                newUser.save().then(user=>
-                {
-                    let msg = `Welcome ${user.firstName}! You have registered successfully. Please login.`;
-                    req.flash('successMessage', msg);
-                    res.redirect('/login');
-                }).catch(err=>
-                {
-                    let msg = `Failed to register user ${req.body.firstName}. 
-                    Error: ${err}`;
-                    req.flash('errorMessage', msg);
-                    res.redirect('/login');
-                });
-            });
+                let msg = `Email ${user.email} already exists, please login instead of registering.`;
+                req.flash('errorMessage', msg);
+                res.redirect('/login');
+            }
         });
     }
 })
@@ -147,18 +144,7 @@ router.get('/post/:id', (req, res)=>
         Category.find({}).then(categories=>
         {
             res.render('home/posts/post', {post: post, categories: categories});
-        }).catch(err=>
-        {
-            let msg = `Failed to load categories. Error: ${err}`;
-            req.flash('errorMessage', msg);
-            res.render('home/posts/post', {post: post});
         });
-        
-    }).catch(err=>
-    {
-        let msg = `Failed to load post: ${req.params.id}. Error: ${err}`;
-        req.flash('errorMessage', msg);
-        res.redirect('/');
     });
 });
 

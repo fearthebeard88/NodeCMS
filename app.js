@@ -24,13 +24,22 @@ app.use(upload({
 // for their api. useFindAndModify is another bit of deprecated code
 // and by setting that option to false it tells the mongoose api to 
 // use the newer findOneAndModify methods instead
-mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFindAndModify: false}).then((db)=>
+// new way of connecting to mongo using callback instead of promise and catch. this method will
+// exit the application if the database fails to connect.
+mongoose.connect('mongodb://localhost:27017/cms', {useNewUrlParser: true, useFindAndModify: false}, (err)=>
 {
-    console.log('Database connected.');
-}).catch(err=>
-{
-    console.log(err);
-});
+    if (err)
+    {
+        // TODO: write to log file instead of console.log
+        // TODO: implement email when a failure like this occurs
+        console.log(`Failed to connect to database. \nError: ${err}`);
+        console.log(process.pid);
+        process.kill(process.pid);
+    }
+
+    console.log('Database is running on port 27017');
+    app.emit('database', null);
+})
 
 // require/include these methods defined in helper directory
 // registering helper methods to use in middleware
@@ -102,4 +111,9 @@ app.use('/admin/categories', categories);
 app.listen(port, ()=>
 {
     console.log(`Listening on port ${port}`);
+    app.on('database', ()=>
+    {
+        console.log('Application is running.');
+    });
+    
 });

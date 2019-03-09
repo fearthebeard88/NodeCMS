@@ -1,12 +1,16 @@
 {{#if successMessage}}
-    <div class="alert alert-success">
-        {{successMessage}}
-    </div>
+    {{#each successMessage}}
+        <div class="alert alert-success">
+            {{this}}
+        </div>
+    {{/each}}
 {{/if}}
 
 {{#if errorMessage}}
-    {{!-- {{flashArrayMessages}} --}}
-    <div class="alert alert-danger">
-        {{errorMessage}}
-    </div>
+    {{#each errorMessage}}
+        {{!-- {{flashArrayMessages}} --}}
+        <div class="alert alert-danger">
+            {{this}}
+        </div>
+    {{/each}}
 {{/if}}

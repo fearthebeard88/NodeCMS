@@ -46,11 +46,6 @@ router.post('/create', (req, res)=>
             let msg = `Saved new category ${newCategory.name}`;
             req.flash('successMessage', msg);
             res.redirect('/admin/categories');
-        }).catch(err=>
-        {
-            let msg = `Error saving new category ${req.body.name}`;
-            req.flash('errorMessage', msg);
-            res.redirect('/admin/categories');
         });
     }
 });
@@ -97,11 +92,6 @@ router.put('/edit/:id', (req, res)=>
                 let msg = `${category.name} has been updated.`;
                 req.flash('successMessage', msg);
                 res.redirect('/admin/categories');
-            }).catch(err=>
-            {
-                let msg = `${category.name} was not updated.`;
-                req.flash('errorMessage', msg);
-                res.redirect('/admin/categories');
             });
         }).catch(err=>
         {
@@ -119,12 +109,6 @@ router.delete('/delete/:id', (req, res)=>
     {
         let msg = `${id.id} has been removed.`;
         req.flash('successMessage', msg);
-        res.redirect('/admin/categories');
-    }).catch(err=>
-    {
-        let msg = `Unable to delete category with id: ${req.params.id}.
-         Error: ${err}`;
-        req.flash('errorMessage', msg);
         res.redirect('/admin/categories');
     });
 });

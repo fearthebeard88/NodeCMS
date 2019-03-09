@@ -33,12 +33,9 @@ router.post('/generate-fake-posts', (req, res)=>
         post.body = faker.lorem.paragraph(5);
 
         post.save().then(newPost=>
-            {
-                console.log(`${post.id} has been created.`);
-            }).catch(err=>
-                {
-                    console.log('Unable to create fake post.');
-                });
+        {
+            console.log(`${post.id} has been created.`);
+        });
     }
 
     res.redirect('/admin/posts');

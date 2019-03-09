@@ -24,9 +24,6 @@ router.get('/', (req, res)=>
     Post.find({}).populate('category').then(posts=>
     {
         res.render('admin/posts/index', {posts: posts});
-    }).catch(err=>
-    {
-        res.render(err);
     });
 });
 
@@ -36,11 +33,6 @@ router.get('/create', (req, res)=>
     Category.find({}).then(categories=>
     {
         res.render('admin/posts/create', {categories: categories});
-    }).catch(err=>
-    {
-        let msg = `Failed to load categories. Error: ${err}`;
-        req.flash('errorMessage', msg);
-        res.redirect('/admin/posts');
     });
 });
 
@@ -116,12 +108,6 @@ router.post('/create', (req, res)=>
             console.log(msg);
             req.flash('successMessage', msg);
             res.redirect('/admin/posts');
-        }).catch(err=>
-        {
-            let msg = `Error saving post. Error: ${err}`;
-            req.flash('errorMessage', msg);
-            console.log(msg);
-            res.redirect('/admin/posts');
         });
     }
 });
@@ -138,13 +124,7 @@ router.get('/edit/:id', (req, res)=>
         Category.find({}).then(categories=>
         {
             res.render('admin/posts/edit', {post: post, categories: categories});
-        }).catch(err=>
-        {
-            let msg = `Failed to load categories. Error: ${err}`;
-            req.flash('errorMessage', msg);
-            res.redirect('/admin/posts');
         });
-        
     }).catch(err=>
     {
         let msg = `Failed to load post with id: ${req.params.id}. Error: ${err}`;
@@ -239,12 +219,6 @@ router.put('/edit/:id', (req, res)=>
             req.flash('successMessage', msg);
             console.log(msg);
             res.redirect('/admin/posts');
-        }).catch(err=>
-        {
-            let msg = `${err.id} failed to update.`
-            req.flash('errorMessage', msg);
-            console.log(msg);
-            res.redirect('/admin/posts');
         });
     });
 });
@@ -279,11 +253,6 @@ router.delete('/:id', (req, res)=>
         });
         
         req.flash('successMessage', `${id.title} was deleted.`);
-        res.redirect('/admin/posts');
-    }).catch(err=>
-    {
-        req.flash('errorMessage', `Error deleting ${id.title}.`);
-        console.log(err);
         res.redirect('/admin/posts');
     });
 });
