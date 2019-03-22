@@ -227,8 +227,19 @@ router.put('/edit/:id', (req, res)=>
 // Delete a post
 router.delete('/:id', (req, res)=>
 {
-    Post.findOneAndDelete({_id: req.params.id}).then(id=>
+    Post.findOne({_id: req.params.id}).then(id=>
     {
+        // id.populate('comments');
+        // if (id.comments.length > 0)
+        // {
+        //     id.comments.foreach(comment=>
+        //     {
+        //         comment.remove();
+        //     });
+        // }
+
+        id.remove();
+
         console.log(`${id.id} has been deleted.`);
         let file = id.file;
         fs.exists(uploadDir + file, (exists)=>
@@ -255,6 +266,12 @@ router.delete('/:id', (req, res)=>
         
         req.flash('successMessage', `${id.title} was deleted.`);
         res.redirect('/admin/posts');
+    }).catch(err=>
+    {
+        if (err) 
+        {
+            throw err;
+        }
     });
 });
 

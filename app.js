@@ -46,7 +46,7 @@ mongoose.connect(mongoUrl, {useNewUrlParser: true, useFindAndModify: false}, (er
 
 // require/include these methods defined in helper directory
 // registering helper methods to use in middleware
-const {select, prettyPrintDate, flashArrayMessages} = require('./helpers/handlebars-helper.js');
+const {select, prettyPrintDate} = require('./helpers/handlebars-helper.js');
 
 // telling server what the template engine and extension is, and
 // setting default layout file
@@ -56,8 +56,7 @@ app.engine('handlebars',
     exphbs({defaultLayout: 'home',
                 helpers: {
                     select: select,
-                    prettyPrintDate: prettyPrintDate,
-                    flashArrayMessages: flashArrayMessages
+                    prettyPrintDate: prettyPrintDate
                 }}));
 
 // setting a key : value pair, similar to Magento's registry
@@ -127,6 +126,7 @@ const home = require('./routes/home/index.js');
 const admin = require('./routes/admin/index.js');
 const posts = require('./routes/admin/posts.js');
 const categories = require('./routes/admin/categories.js');
+const comments = require('./routes/admin/comments.js');
 
 
 // matches requests or part of a request to a router
@@ -134,13 +134,22 @@ app.use('/', home);
 app.use('/admin', admin);
 app.use('/admin/posts', posts);
 app.use('/admin/categories', categories);
+app.use('/admin/comments', comments);
 
-app.listen(port, ()=>
-{
-    console.log(`Listening on port ${port}`);
-    app.on('database', ()=>
-    {
-        console.log('Application is running.');
-    });
+// app.listen(port, ()=>
+// {
+//     console.log(`Listening on port ${port}`);
+//     app.on('database', ()=>
+//     {
+//         console.log('Application is running.');
+//     });
     
+// });
+
+app.on('database', ()=>
+{
+    app.listen(port, ()=>
+    {
+        console.log(`Application is running on port: ${port}.`);
+    });
 });
