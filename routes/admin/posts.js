@@ -28,6 +28,14 @@ router.get('/', (req, res)=>
     });
 });
 
+router.get('/my-posts', (req, res)=>
+{
+    Post.find({user: req.user.id}).then(userPosts=>
+    {
+        res.render('admin/posts/view-posts', {posts: userPosts});
+    });
+});
+
 // Create a post
 router.get('/create', (req, res)=>
 {
@@ -40,20 +48,6 @@ router.get('/create', (req, res)=>
 router.post('/create', (req, res)=>
 {
     let requiredProperties = {title: 'Title', body: 'Description'};
-    // let errors = [];
-
-    // for (let property in req.body)
-    // {
-    //     if (req.body.hasOwnProperty(property) && requiredProperties.hasOwnProperty(property))
-    //     {
-    //         if (!req.body.property)
-    //         {
-    //             errors.push({
-    //                 message: `${requiredProperties[property]} cannot be empty.`
-    //             });
-    //         }
-    //     }
-    // }
 
     let errors = postValidator(req.body, requiredProperties);
     if (errors == null)
@@ -84,14 +78,6 @@ router.post('/create', (req, res)=>
                     throw err;
                 }
             });
-
-            // file.mv('./public/uploads/' + fileName, (err)=>
-            // {
-            //     if (err)
-            //     {
-            //         throw err;
-            //     }
-            // });
         }
 
         var newPost = new Post({
@@ -100,7 +86,8 @@ router.post('/create', (req, res)=>
             allowComments: !(req.body.hasOwnProperty('allowComments')) ? false : true,
             body: req.body.body,
             file: fileName,
-            category: req.body.category
+            category: req.body.category,
+            user: req.user.id
         });
 
         newPost.save().then(savedPost=>
@@ -182,6 +169,7 @@ router.put('/edit/:id', (req, res)=>
         post.allowComments = !(req.body.hasOwnProperty('allowComments')) ? false : true;
         post.body = req.body.body;
         post.category = req.body.category;
+        post.user = req.user.id;
         if (fileName != null)
         {
             // if the user updated their image then we want to get 
@@ -227,16 +215,15 @@ router.put('/edit/:id', (req, res)=>
 // Delete a post
 router.delete('/:id', (req, res)=>
 {
-    Post.findOne({_id: req.params.id}).then(id=>
+    Post.findOne({_id: req.params.id}).populate('comments').then(id=>
     {
-        // id.populate('comments');
-        // if (id.comments.length > 0)
-        // {
-        //     id.comments.foreach(comment=>
-        //     {
-        //         comment.remove();
-        //     });
-        // }
+        if (id.comments.length > 0)
+        {
+            id.comments.forEach(comment=>
+            {
+                comment.remove();
+            })
+        }
 
         id.remove();
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const Post = require('../../models/Post');
 const User = require('../../models/User');
 const Category = require('../../models/Category');
+const Comment = require('../../models/Comment');
 const {postValidator} = require('../../helpers/handlebars-helper');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
@@ -238,7 +239,8 @@ router.post('/register', (req, res)=>
 
 router.get('/post/:id', (req, res)=>
 {
-    Post.findById(req.params.id).then(post=>
+    Post.findById(req.params.id).populate({path: 'comments',
+    populate: {path: 'user', model: 'users'}}).populate('user').then(post=>
     {
         Category.find({}).then(categories=>
         {

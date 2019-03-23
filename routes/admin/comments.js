@@ -32,7 +32,7 @@ router.post('/', (req, res)=>
 
 router.get('/', (req, res)=>
 {
-    Comment.find({}).populate('user').then(comments=>
+    Comment.find({user: req.user.id}).populate('user').then(comments=>
     {
         res.render('admin/comments', {comments: comments});
     });
@@ -42,8 +42,18 @@ router.delete('/delete/:id', (req, res)=>
 {
     Comment.findOneAndDelete({_id: req.params.id}).then(deletedComment=>
     {
-        req.flash('successMessage', `Deleted comment with id: ${req.params.id}`);
-        res.redirect('/admin/comments');
+        Post.findOneAndUpdate({comments: req.params.id}, {
+            $pull: {comments: req.params.id}
+        }).then(data=>
+        {
+            req.flash('successMessage', `Deleted comment with id: ${deletedComment.id}`);
+            res.redirect('/admin/comments');
+        }).catch(err=>
+        {
+            console.log(err);
+            req.flash('errorMessage', `Recieved error: ${err}`);
+            res.redirect('/admin.comments');
+        });
     })
 })
 
