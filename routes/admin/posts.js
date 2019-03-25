@@ -117,7 +117,7 @@ router.get('/edit/:id', (req, res)=>
     {
         let msg = `Failed to load post with id: ${req.params.id}. Error: ${err}`;
         req.flash('errorMessage', msg);
-        res.redirect('/admin/posts');
+        res.redirect('/admin/my-posts');
     });
 });
 
@@ -207,7 +207,7 @@ router.put('/edit/:id', (req, res)=>
             let msg = `${updated.id} has been updated.`;
             req.flash('successMessage', msg);
             console.log(msg);
-            res.redirect('/admin/posts');
+            res.redirect('/admin/posts/my-posts');
         });
     });
 });
@@ -252,7 +252,7 @@ router.delete('/:id', (req, res)=>
         });
         
         req.flash('successMessage', `${id.title} was deleted.`);
-        res.redirect('/admin/posts');
+        res.redirect('/admin/posts/my-posts');
     }).catch(err=>
     {
         if (err) 

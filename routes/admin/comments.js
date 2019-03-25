@@ -24,6 +24,9 @@ router.post('/', (req, res)=>
         {
             comment.save().then(savedComment=>
             {
+                let msg = `Comment saved. The comment will show once the post
+                author approves the comment.`;
+                req.flash('successMessage', msg);
                 res.redirect(`/post/${savedPost.id}`);
             });
         });   
@@ -54,7 +57,19 @@ router.delete('/delete/:id', (req, res)=>
             req.flash('errorMessage', `Recieved error: ${err}`);
             res.redirect('/admin.comments');
         });
-    })
-})
+    });
+});
+
+router.post('/approve-comment', (req,res)=>
+{
+    Comment.findByIdAndUpdate(req.body.id,
+        {$set: {approveComment: req.body.approveComment}}).then(comment=>
+        {
+            res.send(comment);
+        }).catch(err=>
+        {
+            if (err) return err;
+        })
+});
 
 module.exports = router;
