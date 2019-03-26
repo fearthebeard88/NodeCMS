@@ -1,6 +1,6 @@
 #! /bin/bash
 
-export PORT=3000
+export PORT=80
 export MONGO_PORT=27017
 
 type nodemon > /dev/null
