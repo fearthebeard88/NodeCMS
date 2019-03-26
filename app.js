@@ -29,7 +29,7 @@ app.use(upload({
 // use the newer findOneAndModify methods instead
 // new way of connecting to mongo using callback instead of promise and catch. this method will
 // exit the application if the database fails to connect.
-mongoose.connect(mongoUrl, {useNewUrlParser: true, useFindAndModify: false}, (err)=>
+mongoose.connect(mongoUrl, {useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true}, (err)=>
 {
     if (err)
     {

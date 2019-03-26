@@ -237,9 +237,9 @@ router.post('/register', (req, res)=>
     }
 })
 
-router.get('/post/:id', (req, res)=>
+router.get('/post/:slug', (req, res)=>
 {
-    Post.findById(req.params.id).populate({path: 'comments', match: {approveComment: true},
+    Post.findOne({slug: req.params.slug}).populate({path: 'comments', match: {approveComment: true},
     populate: {path: 'user', model: 'users'}}).populate('user').then(post=>
     {
         Category.find({}).then(categories=>
