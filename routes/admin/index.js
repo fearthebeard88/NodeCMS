@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Post = require('../../models/Post');
 const Category = require('../../models/Category');
+const Comment = require('../../models/Comment');
+const User = require('../../models/User');
 const faker = require('faker');
 const {userAuthenticated} = require('../../helpers/authentication');
 
@@ -20,7 +22,23 @@ router.all('/*',userAuthenticated, (req, res, next)=>
 // router instead of the home router
 router.get('/', (req, res)=>
 {
-    res.render('admin/index');
+    Post.countDocuments({}).then(postCount=>
+    {
+        Comment.countDocuments({}).then(commentCount=>
+        {
+            User.countDocuments({}).then(userCount=>
+            {
+                Category.countDocuments({}).then(categoryCount=>
+                {
+                    res.render('admin/index', {postCount: postCount,
+                        commentCount: commentCount,
+                        userCount: userCount,
+                        categoryCount: categoryCount});
+                })
+            })
+        })
+    })
+    
 });
 
 router.post('/generate-fake-posts', (req, res)=>
