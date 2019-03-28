@@ -50,10 +50,16 @@ router.post('/generate-fake-posts', (req, res)=>
         post.allowComments = false;
         post.status = "draft";
         post.body = faker.lorem.paragraph(5);
+        post.slug = faker.name.title();
 
         post.save().then(newPost=>
         {
             console.log(`${post.id} has been created.`);
+        }).catch(err=>
+        {
+            let msg = `Error occured during dummy post
+            creation. Error: ${err}`;
+            console.log(msg);
         });
     }
 

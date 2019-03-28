@@ -46,7 +46,7 @@ mongoose.connect(mongoUrl, {useNewUrlParser: true, useFindAndModify: false, useC
 
 // require/include these methods defined in helper directory
 // registering helper methods to use in middleware
-const {select, prettyPrintDate} = require('./helpers/handlebars-helper.js');
+const {select, prettyPrintDate, paginate} = require('./helpers/handlebars-helper.js');
 
 // telling server what the template engine and extension is, and
 // setting default layout file
@@ -56,7 +56,8 @@ app.engine('handlebars',
     exphbs({defaultLayout: 'home',
                 helpers: {
                     select: select,
-                    prettyPrintDate: prettyPrintDate
+                    prettyPrintDate: prettyPrintDate,
+                    paginate: paginate
                 }}));
 
 // setting a key : value pair, similar to Magento's registry
