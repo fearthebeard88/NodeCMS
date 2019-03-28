@@ -22,23 +22,21 @@ router.all('/*',userAuthenticated, (req, res, next)=>
 // router instead of the home router
 router.get('/', (req, res)=>
 {
-    Post.countDocuments({}).then(postCount=>
+    let promises = [
+        Post.countDocuments().exec(),
+        Comment.countDocuments().exec(),
+        User.countDocuments().exec(),
+        Category.countDocuments().exec()
+    ];
+
+    Promise.all(promises).then(([postCount, commentCount,
+        userCount, categoryCount])=>
     {
-        Comment.countDocuments({}).then(commentCount=>
-        {
-            User.countDocuments({}).then(userCount=>
-            {
-                Category.countDocuments({}).then(categoryCount=>
-                {
-                    res.render('admin/index', {postCount: postCount,
-                        commentCount: commentCount,
-                        userCount: userCount,
-                        categoryCount: categoryCount});
-                })
-            })
-        })
-    })
-    
+        res.render('admin/index', {postCount: postCount,
+            commentCount: commentCount,
+            userCount: userCount,
+            categoryCount: categoryCount});
+    });
 });
 
 router.post('/generate-fake-posts', (req, res)=>
