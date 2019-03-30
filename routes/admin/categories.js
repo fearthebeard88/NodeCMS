@@ -51,6 +51,9 @@ router.post('/create', (req, res)=>
     }
 });
 
+// TODO: change search by id to search by slug
+// TODO: change front facing error message to something
+// more generic, log real message
 router.get('/edit/:id', (req, res)=>
 {
     Category.findById(req.params.id).then(category=>
@@ -65,6 +68,8 @@ router.get('/edit/:id', (req, res)=>
     });
 });
 
+// TODO: change search by id to search by slug
+// TODO: review catch statements
 router.put('/edit/:id', (req, res)=>
 {
     let requiredProperties = {name: 'Name'};
@@ -104,6 +109,7 @@ router.put('/edit/:id', (req, res)=>
     }
 });
 
+// TODO: change search by id to search by slug
 router.delete('/delete/:id', (req, res)=>
 {
     Category.findOneAndDelete({_id: req.params.id}).then(id=>

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require('express');
 const port = process.env.PORT || 8000;
 const app = express();
@@ -12,6 +13,7 @@ const flash = require('connect-flash');
 const {mongoUrl} = require('./config/database');
 const passport = require('passport');
 const User = require('./models/User');
+const {log} = require('./core_functions' + path.sep + 'functions.js');
 
 // tells server to serve static content (css and js files) from public
 // directory
@@ -29,15 +31,15 @@ app.use(upload({
 // use the newer findOneAndModify methods instead
 // new way of connecting to mongo using callback instead of promise and catch. this method will
 // exit the application if the database fails to connect.
-mongoose.connect(mongoUrl, {useNewUrlParser: true, useFindAndModify: false, useCreateIndex: true}, (err)=>
+mongoose.connect(mongoUrl, {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true}, (err)=>
 {
     if (err)
     {
-        // TODO: write to log file instead of console.log
-        // TODO: implement email when a failure like this occurs
-        console.log(`Failed to connect to database. \nError: ${err}`);
-        console.log(process.pid);
-        process.kill(process.pid);
+        log(`Recieved error when attempting to load mongoose (database). Error: ${err}`)
+        return;
     }
 
     console.log('Database is running on port 27017');
@@ -137,15 +139,29 @@ app.use('/admin/posts', posts);
 app.use('/admin/categories', categories);
 app.use('/admin/comments', comments);
 
-// app.listen(port, ()=>
-// {
-//     console.log(`Listening on port ${port}`);
-//     app.on('database', ()=>
-//     {
-//         console.log('Application is running.');
-//     });
-    
-// });
+// if we are in development mode we can display the errors
+// without worrying about end user experience
+if (app.get('env') === 'development')
+{
+    app.use((err, req, res, next)=>
+    {
+        res.status(err.status || 500);
+        res.render('error', {message: err.message,
+        error: err});
+    });
+}
+
+// if we hit this one we are in production mode and 
+// need to worry about end user experience so we log
+// the error and send the request to the next middleware
+else
+{
+    app.use((err, req, res, next)=>
+    {
+        log(err);
+        next();
+    })
+}
 
 app.on('database', ()=>
 {

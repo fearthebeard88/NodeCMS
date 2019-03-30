@@ -45,6 +45,7 @@ router.get('/create', (req, res)=>
     });
 });
 
+// TODO: add placeholder image
 router.post('/create', (req, res)=>
 {
     let requiredProperties = {title: 'Title', body: 'Description'};
@@ -105,8 +106,12 @@ router.post('/create', (req, res)=>
 // to send a parameter in the url you need to use a placeholder
 // in the route, so to get an id as a url parameter, 
 // you use :id as a placeholder for the route
+// TODO: change search by id to search by slug
+// TODO: change to run queries from promises instead of
+// nesting them
 router.get('/edit/:id', (req, res)=>
 {
+    console.log('hit the right controller');
     Post.findById(req.params.id).then(post=>
     {
         Category.find({}).then(categories=>
@@ -122,6 +127,7 @@ router.get('/edit/:id', (req, res)=>
 });
 
 // This is the actual edit request sent by the form
+// TODO: change search by id to search by slug
 router.put('/edit/:id', (req, res)=>
 {
     let requiredFields = {title: 'Title', body: 'Description'};

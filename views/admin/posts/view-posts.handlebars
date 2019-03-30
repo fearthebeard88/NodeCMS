@@ -21,10 +21,10 @@
             <td>{{category.name}}</td>
             <td>{{allowComments}}</td>
             <td>{{prettyPrintDate date 'MMMM Do YYYY'}}</td>
-            <td><a href="/post/{{id}}">View</a></td>
-            <td><a href="/admin/posts/edit/{{id}}" class="btn btn-info">Edit</a></td>
+            <td><a href="/post/{{slug}}">View</a></td>
+            <td><a href="/admin/posts/edit/{{slug}}" class="btn btn-info">Edit</a></td>
             <td>
-                <form action="/admin/posts/{{id}}?_method=DELETE" method="post">
+                <form action="/admin/posts/{{slug}}?_method=DELETE" method="post">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </td>

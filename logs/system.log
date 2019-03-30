@@ -1,0 +1,11 @@
+1553954516539Logged Message: Hello world!
+2019-2-30_10:12:33:303 Logged Message: Hello world!
+2019-3-30_10:16:4:71 Logged Message: Hello world!
+2019-3-30_10:22:54:486 Logged Message: Hello World!
+2019-3-30 10:23:43:285 Logged Message: Hello World!
+2019-3-30 10:25:44:735 Logged Message: Hello World!
+2019-3-30 10:35:4:520 Logged Message: Hello World!
+2019-3-30 10:41:36:104 Logged Message: Hello World!
+2019-3-30 10:42:35:170 Logged Message: Hello World!
+2019-3-30 10:52:46:790 Logged Message: Recieved error when attempting to load mongoose (database). Error: MongoNetworkError: failed to connect to server [localhost:27018] on first connect [MongoNetworkError: connect ECONNREFUSED 127.0.0.1:27018]
+2019-3-30 11:21:51:151 Logged Message: Error: This is a test.

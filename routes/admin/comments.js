@@ -3,12 +3,14 @@ const router = express.Router();
 const Comment = require('../../models/Comment');
 const Post = require('../../models/Post');
 
+// TODO: add user authentication
 router.all('/*', (req, res, next)=>
 {
     req.app.locals.layout = 'admin';
     next();
 });
 
+// TODO: add post validation
 router.post('/', (req, res)=>
 {
     Post.findById(req.body.id).then(post=>
@@ -41,6 +43,7 @@ router.get('/', (req, res)=>
     });
 });
 
+// TODO: change search by id to search by slug
 router.delete('/delete/:id', (req, res)=>
 {
     Comment.findOneAndDelete({_id: req.params.id}).then(deletedComment=>
