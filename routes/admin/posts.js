@@ -106,29 +106,21 @@ router.post('/create', (req, res)=>
 // to send a parameter in the url you need to use a placeholder
 // in the route, so to get an id as a url parameter, 
 // you use :id as a placeholder for the route
-// TODO: change search by id to search by slug
-// TODO: change to run queries from promises instead of
-// nesting them
-router.get('/edit/:id', (req, res)=>
+router.get('/edit/:slug', (req, res)=>
 {
-    console.log('hit the right controller');
-    Post.findById(req.params.id).then(post=>
+    let promises = [
+        Post.findOne({slug: req.params.slug}).exec(),
+        Category.find({}).exec()
+    ];
+
+    Promise.all(promises).then(([post, category])=>
     {
-        Category.find({}).then(categories=>
-        {
-            res.render('admin/posts/edit', {post: post, categories: categories});
-        });
-    }).catch(err=>
-    {
-        let msg = `Failed to load post with id: ${req.params.id}. Error: ${err}`;
-        req.flash('errorMessage', msg);
-        res.redirect('/admin/my-posts');
+        res.render('admin/posts/edit', {post: post, categories: category});
     });
 });
 
 // This is the actual edit request sent by the form
-// TODO: change search by id to search by slug
-router.put('/edit/:id', (req, res)=>
+router.put('/edit/:slug', (req, res)=>
 {
     let requiredFields = {title: 'Title', body: 'Description'};
     let errors = postValidator(req.body, requiredFields);
@@ -154,7 +146,6 @@ router.put('/edit/:id', (req, res)=>
 
     if (req.files.file.name.trim().length > 0)
     {
-        console.log(req.files);
         let file = req.files.file;
         fileName = Date.now() + '-' + file.name;
 
@@ -168,7 +159,8 @@ router.put('/edit/:id', (req, res)=>
         });
     }
 
-    Post.findOne({_id: req.params.id}).then(post=>
+    console.log(req.params.slug);
+    Post.findOne({slug: req.params.slug}).then(post=>
     {
         post.status = req.body.status;
         post.title = req.body.title;
@@ -219,9 +211,9 @@ router.put('/edit/:id', (req, res)=>
 });
 
 // Delete a post
-router.delete('/:id', (req, res)=>
+router.delete('/:slug', (req, res)=>
 {
-    Post.findOne({_id: req.params.id}).populate('comments').then(id=>
+    Post.findOne({slug: req.params.slug}).populate('comments').then(id=>
     {
         if (id.comments.length > 0)
         {

@@ -1,7 +1,7 @@
 <h1>Edit Post</h1>
 
 <!-- uses PUT http method to send request to router with post id -->
-<form action="/admin/posts/edit/{{post.id}}?_method=PUT" method="post" enctype="multipart/form-data">
+<form action="/admin/posts/edit/{{post.slug}}?_method=PUT" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label for="title">Title</label>
         <input name="title" type="text" class="form-control" id="title" value="{{post.title}}">

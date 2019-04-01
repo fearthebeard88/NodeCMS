@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const Comment = require('../../models/Comment');
 const Post = require('../../models/Post');
+const {userAuthenticated} = require('../../helpers/authentication');
+const {postValidator} = require('../../helpers/handlebars-helper');
 
 // TODO: add user authentication
-router.all('/*', (req, res, next)=>
+router.all('/*', userAuthenticated, (req, res, next)=>
 {
     req.app.locals.layout = 'admin';
     next();
@@ -13,6 +15,27 @@ router.all('/*', (req, res, next)=>
 // TODO: add post validation
 router.post('/', (req, res)=>
 {
+    let requiredFields = {
+        body: 'Comment Body'
+    }
+
+    let errors = postValidator(req.body, requiredFields);
+
+    if (errors === null)
+    {
+        errors = [{message: 'Validation failed.'}];
+    }
+
+    if (errors.length > 0)
+    {
+        Post.findOne({_id: req.body.id}).then(post=>
+        {
+            let slug = post.slug;
+            req.flash('errorMessage', errors.message);
+            res.redirect(`/post/${slug}`);
+        });
+    }
+
     Post.findById(req.body.id).then(post=>
     {
         comment = new Comment({
