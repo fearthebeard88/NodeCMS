@@ -115,6 +115,8 @@ app.use((req, res, next)=>
     res.locals.user = req.user || null;
     res.locals.successMessage = req.flash('successMessage');
     res.locals.errorMessage = req.flash('errorMessage');
+    res.locals.commentTitle = req.flash('commentTitle');
+    res.locals.commentBody = req.flash('commentBody');
 
     // local variables for passport flash messages
     // res.locals.<object key to be retrieved> = 

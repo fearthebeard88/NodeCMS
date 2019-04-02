@@ -12,11 +12,11 @@ router.all('/*', userAuthenticated, (req, res, next)=>
     next();
 });
 
-// TODO: add post validation
 router.post('/', (req, res)=>
 {
     let requiredFields = {
-        body: 'Comment Body'
+        commentBody: 'Comment Body',
+        commentTitle: 'Title'
     }
 
     let errors = postValidator(req.body, requiredFields);
@@ -28,34 +28,48 @@ router.post('/', (req, res)=>
 
     if (errors.length > 0)
     {
-        Post.findOne({_id: req.body.id}).then(post=>
+        Post.findById(req.body.id).then(post=>
         {
-            let slug = post.slug;
-            req.flash('errorMessage', errors.message);
-            res.redirect(`/post/${slug}`);
+            for (let i = 0; i < errors.length; i++)
+            {
+                req.flash('errorMessage', errors[i].message);
+            }
+
+            for (let prop in req.body)
+            {
+                if (prop.trim() != '')
+                {
+                    req.flash(prop, req.body[prop]);
+                }
+            }
+
+            res.redirect(`/post/${post.slug}`);
         });
     }
-
-    Post.findById(req.body.id).then(post=>
+    else
     {
-        comment = new Comment({
-            body: req.body.body,
-            user: req.user.id
-        });
-
-        post.comments.push(comment);
-
-        post.save().then(savedPost=>
+        Post.findById(req.body.id).then(post=>
         {
-            comment.save().then(savedComment=>
-            {
-                let msg = `Comment saved. The comment will show once the post
-                author approves the comment.`;
-                req.flash('successMessage', msg);
-                res.redirect(`/post/${savedPost.id}`);
+            comment = new Comment({
+                body: req.body.commentBody,
+                user: req.user.id,
+                title: req.body.commentTitle
             });
-        });   
-    });
+    
+            post.comments.push(comment);
+    
+            post.save().then(savedPost=>
+            {
+                comment.save().then(savedComment=>
+                {
+                    let msg = `Comment saved. The comment will show once the post
+                    author approves the comment.`;
+                    req.flash('successMessage', msg);
+                    res.redirect(`/post/${savedPost.slug}`);
+                });
+            });   
+        });
+    }
 });
 
 router.get('/', (req, res)=>

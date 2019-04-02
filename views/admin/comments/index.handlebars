@@ -16,7 +16,8 @@
             <td>{{user.firstName}} {{user.lastName}}</td>
             <td><input {{#if approveComment}} checked {{/if}} data-id="{{id}}" type="checkbox" name="approveComment"></td>
             <td>{{prettyPrintDate date "MMMM Do YYYY"}}</td>
-            <td><form action="/admin/comments/delete/{{id}}?_method=DELETE" method="POST">
+            <td><a href="/admin/comments/view/{{slug}}"</td>
+            <td><form action="/admin/comments/delete/{{slug}}?_method=DELETE" method="POST">
                 <button type="submit" class="btn btn-danger">Delete</button>
             </form></td>
         </tr>

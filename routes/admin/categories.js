@@ -21,6 +21,9 @@ router.get('/', (req, res)=>
     });
 });
 
+// TODO: switch from rendering errors to sending
+// flash message errors, this is more consistent
+// with the design pattern so far
 router.post('/create', (req, res)=>
 {
     let requiredProperties = {name: 'Name'};
