@@ -16,7 +16,11 @@
             </div>
             <div class="card-footer text-muted">
               Posted on {{prettyPrintDate date 'MMMM Do YYYY'}} by
-              <a href="#">Someone who does not exist yet...</a>
+              {{#if user}}
+                <a href="#">{{user.firstName}} {{user.lastName}}</a>
+              {{else}}
+                <a href="#">Someone created by Faker...</a>
+              {{/if}}
             </div>
           </div>
           {{/each}}

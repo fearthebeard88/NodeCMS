@@ -5,7 +5,6 @@ const Post = require('../../models/Post');
 const {userAuthenticated} = require('../../helpers/authentication');
 const {postValidator} = require('../../helpers/handlebars-helper');
 
-// TODO: add user authentication
 router.all('/*', userAuthenticated, (req, res, next)=>
 {
     req.app.locals.layout = 'admin';
@@ -74,30 +73,41 @@ router.post('/', (req, res)=>
 
 router.get('/', (req, res)=>
 {
-    Comment.find({user: req.user.id}).populate('user').then(comments=>
+    Post.find({user: req.user.id}).then(posts=>
     {
-        res.render('admin/comments', {comments: comments});
+        let commentIds = [];
+        for (let i = 0; i < posts.length; i++)
+        {
+            commentIds.push(posts[i].comments);
+        }
+
+        Comment.find({_id: { $in: commentIds[0]}}).populate('user').then(comments=>
+        {
+            res.render('admin/comments', {comments: comments});
+        });
     });
 });
 
-// TODO: change search by id to search by slug
-router.delete('/delete/:id', (req, res)=>
+router.delete('/delete/:slug', (req, res)=>
 {
-    Comment.findOneAndDelete({_id: req.params.id}).then(deletedComment=>
+    Comment.findOneAndDelete({slug: req.params.slug}).then(deletedComment=>
     {
-        Post.findOneAndUpdate({comments: req.params.id}, {
-            $pull: {comments: req.params.id}
+        Post.findOneAndUpdate({comments: deletedComment.id}, {
+            $pull: {comments: deletedComment.id}
         }).then(data=>
         {
             req.flash('successMessage', `Deleted comment with id: ${deletedComment.id}`);
             res.redirect('/admin/comments');
         }).catch(err=>
         {
-            console.log(err);
             req.flash('errorMessage', `Recieved error: ${err}`);
-            res.redirect('/admin.comments');
+            res.redirect('/admin/comments');
         });
-    });
+    }).catch(err=>
+    {
+        console.log(err);
+        res.redirect('/admin/comments');
+    })
 });
 
 router.post('/approve-comment', (req,res)=>
@@ -111,5 +121,18 @@ router.post('/approve-comment', (req,res)=>
             if (err) return err;
         })
 });
+
+// TODO: use comment slug to get post, then get comments from
+// post. finish view file
+router.get('/view/:slug', (req, res)=>
+{
+    Comment.findOne({slug: req.params.slug}).then(comment=>
+    {
+        Post.findOne({comment: comment.id}).populate('comments').then(post=>
+        {
+            res.render('admin/comments/view', {comment: comment});
+        })
+    });
+})
 
 module.exports = router;

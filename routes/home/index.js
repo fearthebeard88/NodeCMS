@@ -3,7 +3,6 @@ const router = express.Router();
 const Post = require('../../models/Post');
 const User = require('../../models/User');
 const Category = require('../../models/Category');
-const Comment = require('../../models/Comment');
 const {postValidator} = require('../../helpers/handlebars-helper');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
@@ -21,7 +20,7 @@ router.get('/', (req, res)=>
     const page = req.query.page || 1;
 
     Post.find({}).skip((perPage * page) - perPage)
-    .limit(perPage).then(posts=>
+    .limit(perPage).populate('user').then(posts=>
     {
         Post.countDocuments().then(postCount=>
         {
@@ -145,6 +144,13 @@ router.get('/logout', (req, res)=>
 
 router.get('/register', (req, res)=>
 {
+    if (req.user)
+    {
+        req.flash('errorMessage', 'Please logout before attempting to register a new user.');
+        res.redirect('/');
+        return;
+    }
+
     res.render('home/register');
 });
 
