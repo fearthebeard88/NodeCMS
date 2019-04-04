@@ -21,9 +21,6 @@ router.get('/', (req, res)=>
     });
 });
 
-// TODO: switch from rendering errors to sending
-// flash message errors, this is more consistent
-// with the design pattern so far
 router.post('/create', (req, res)=>
 {
     let requiredProperties = {name: 'Name'};
@@ -35,9 +32,12 @@ router.post('/create', (req, res)=>
 
     if (errors.length > 0)
     {
-        res.render('admin/categories/index', {
-            errors: errors
-        });
+        for (let i = 0; i < errors.length; i++)
+        {
+            req.flash('errorMessage', errors[i].message);
+        }
+
+        res.redirect('/admin/categories');
     }
     else
     {
@@ -54,26 +54,22 @@ router.post('/create', (req, res)=>
     }
 });
 
-// TODO: change search by id to search by slug
-// TODO: change front facing error message to something
-// more generic, log real message
-router.get('/edit/:id', (req, res)=>
+router.get('/edit/:slug', (req, res)=>
 {
-    Category.findById(req.params.id).then(category=>
+    Category.findOne({slug: req.params.slug}).then(category=>
     {
         res.render('admin/categories/edit', {category: category});
     }).catch(err=>
     {
-        let msg = `Unable to get category with id: ${req.params.id}.
+        let msg = `No category with slug: ${req.params.slug}.
          Recieved the following error: ${err}`;
         req.flash('errorMessage', msg);
         res.redirect('/admin/categories');
     });
 });
 
-// TODO: change search by id to search by slug
 // TODO: review catch statements
-router.put('/edit/:id', (req, res)=>
+router.put('/edit/:slug', (req, res)=>
 {
     let requiredProperties = {name: 'Name'};
     let errors = postValidator(req.body, requiredProperties);
@@ -89,11 +85,11 @@ router.put('/edit/:id', (req, res)=>
             req.flash('errorMessage', errors[i].message);
         }
 
-        res.redirect('/admin/categories/edit/' + req.params.id);
+        res.redirect('/admin/categories/edit/' + req.params.slug);
     }
     else
     {
-        Category.findOne({_id: req.params.id}).then(category=>
+        Category.findOne({slug: req.params.slug}).then(category=>
         {
             category.name = req.body.name;
             category.save().then(updatedCat=>
@@ -102,20 +98,13 @@ router.put('/edit/:id', (req, res)=>
                 req.flash('successMessage', msg);
                 res.redirect('/admin/categories');
             });
-        }).catch(err=>
-        {
-            let msg = `The following error occured when
-             attempting to find ${req.body.name}. Error: ${err}`;
-            req.flash('errorMessage', msg);
-            res.redirect('/admin/categories');
         });
     }
 });
 
-// TODO: change search by id to search by slug
-router.delete('/delete/:id', (req, res)=>
+router.delete('/delete/:slug', (req, res)=>
 {
-    Category.findOneAndDelete({_id: req.params.id}).then(id=>
+    Category.findOneAndDelete({slug: req.params.slug}).then(id=>
     {
         let msg = `${id.id} has been removed.`;
         req.flash('successMessage', msg);

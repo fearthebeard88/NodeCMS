@@ -122,17 +122,16 @@ router.post('/approve-comment', (req,res)=>
         })
 });
 
-// TODO: use comment slug to get post, then get comments from
-// post. finish view file
 router.get('/view/:slug', (req, res)=>
 {
     Comment.findOne({slug: req.params.slug}).then(comment=>
     {
-        Post.findOne({comment: comment.id}).populate('comments').then(post=>
+        Post.findOne({comments: comment.id}).populate('user')
+        .populate({path: 'comments', match: {approveComment: true}, populate: {path: 'user'}}).then(post=>
         {
-            res.render('admin/comments/view', {comment: comment});
-        })
+            res.render('admin/comments/view', {comment: comment, post: post});
+        });
     });
-})
+});
 
 module.exports = router;

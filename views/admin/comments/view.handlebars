@@ -3,3 +3,51 @@
 <!-- comment body, title, user, date -->
 <!-- post title, status, body, date, file, category, comments -->
 
+<div class="row">
+  <!-- Post Content Column -->
+  <div class="col-lg-8">
+    <!-- Title -->
+    <h1 class="mt-4">{{post.title}}</h1>
+    <!-- Author -->
+    <p class="lead">
+      by
+      <a href="#">{{#if post.user}}{{post.user.firstName}} {{post.user.lastName}}{{else}}Someone who does not exist...{{/if}}</a>
+    </p>
+    <hr>
+    <!-- Date/Time -->
+    <p>Posted on {{prettyPrintDate date "MMMM Do YYYY"}}</p>
+    <hr>
+    <!-- Preview Image -->
+    <img class="img-fluid rounded" src="/uploads/{{post.file}}" alt="">
+    <hr>
+    <!-- Post Content -->
+    <p class="text-center lead">{{post.body}}</p>
+    <hr>
+    <div class="text-center">
+      <input {{#if comment.approveComment}} checked {{/if}} data-id="{{comment.id}}" type="checkbox" name="approveComment">
+    </div>
+      <div class="card my-4">
+        <h5 class="card-header text-center">Comment in question:</h5>
+        <div class="card-body">
+          <div class="text-center jumbotron">
+              <h1>Comment Title: {{comment.title}}</h1>
+              <br>
+              <hr>
+              <br>
+              <p>{{comment.body}}</p>
+          </div>
+        </div>
+      </div>
+    <!-- Single Comment -->
+    {{#each post.comments}}
+        <div class="card my-4">
+            <h5 class="card-header text-center">Posted By: {{user.firstName}} {{user.lastName}}</h5>
+            <div class="card-body">
+                <div class="text-center">
+                    <p>{{body}}</p>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+  </div>
+</div>

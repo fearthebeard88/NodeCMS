@@ -36,10 +36,10 @@
                     <td>{{name}}</td>
                     <td>{{prettyPrintDate date 'MMMM Do YYYY'}}</td>
                     <td>
-                        <a href="/admin/categories/edit/{{id}}" class="btn btn-info">Edit</a>
+                        <a href="/admin/categories/edit/{{slug}}" class="btn btn-info">Edit</a>
                     </td>
                     <td>
-                        <form action="/admin/categories/delete/{{id}}?_method=DELETE" method="post">
+                        <form action="/admin/categories/delete/{{slug}}?_method=DELETE" method="post">
                             <button type="submit" class="btn btn-danger">Delete</button>
                         </form>
                     </td>
